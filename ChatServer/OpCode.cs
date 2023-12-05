@@ -2,13 +2,9 @@
 {
     public enum OpCode
     {
-        Join = 0,
-        Quit = 1,
+        Join = 1,
+        Quit = 2,
         
-        SetName = 10,
-        GetNames = 11,
-        
-        Message = 20,
-        DirectMessage = 21,
+        Message = 10,
     }
 }
