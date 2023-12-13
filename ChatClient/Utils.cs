@@ -169,7 +169,7 @@ namespace ChatClient
 
                 if (target.Connected)
                 {
-                    SendMessage(ref target, OpCode.Message, $"{GetName(ref target).Name}: {message}");
+                    SendMessage(ref target, OpCode.Message, message);
                 }
                 else
                 {
