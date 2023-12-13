@@ -154,7 +154,7 @@ namespace ChatServer
         /// 서버에 접속한 모든 클라이언트한테 메시지를 전송합니다.
         /// </summary>
         /// <param name="message"></param>
-        public void Broadcast(ref Socket sendBy, in string message)
+        public void Broadcast(in string message)
         {
             if (clientMap == null)
             {
@@ -169,7 +169,7 @@ namespace ChatServer
 
                 if (target.Connected)
                 {
-                    SendMessage(ref target, OpCode.Message, $"{GetName(ref sendBy).Name}: {message}");
+                    SendMessage(ref target, OpCode.Message, message);
                 }
                 else
                 {

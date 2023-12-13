@@ -97,6 +97,7 @@ namespace ChatServer
                     if (status)
                     {
                         Utils.print($"{serverUtils.GetName(ref client).Name}님이 접속했습니다.");
+                        serverUtils.Broadcast($"[알림] {serverUtils.GetName(ref client).Name}님이 접속했습니다.");
                     }
                 }
                 else if (op == OpCode.Quit)
@@ -104,11 +105,12 @@ namespace ChatServer
                     if (status)
                     {
                         Utils.print($"{serverUtils.GetName(ref client)}님이 접속을 종료했습니다.");
+                        serverUtils.Broadcast($"[알림] {serverUtils.GetName(ref client).Name}님이 접속을 종료했습니다.");
                     }
                 }
                 else if (op == OpCode.Message)
                 {
-                    serverUtils.Broadcast(ref client, (string)result);
+                    serverUtils.Broadcast($"{serverUtils.GetName(ref client).Name}: {(string)result}");
                 }
             }
         }
