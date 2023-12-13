@@ -1,12 +1,11 @@
-﻿using ChatUtils;
-using System.Net;
+﻿using System.Net;
 using System.Net.Sockets;
 
 namespace ChatServer
 {
-    class Program
+    internal class Program
     {
-        struct Pack
+        private struct Pack
         {
             public Socket client;
             public Utils ut;
@@ -27,7 +26,7 @@ namespace ChatServer
 
             while (true)
             {
-                var client = ut.Accept();
+                Socket client = ut.Accept();
 
                 Utils.print($"{client.RemoteEndPoint}가 접속했습니다.");
 
@@ -71,7 +70,7 @@ namespace ChatServer
             IPEndPoint ep = (IPEndPoint)client.RemoteEndPoint;
 
             Utils serverUtils = tmp.ut;
-            Utils clientUtils = new Utils(ref client);
+            Utils clientUtils = new(ref client);
 
             while (true)
             {
@@ -114,9 +113,9 @@ namespace ChatServer
             }
         }
 
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
-            new Program();
+            _ = new Program();
         }
     }
 }

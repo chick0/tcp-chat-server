@@ -2,11 +2,10 @@
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
-namespace ChatUtils
+namespace ChatServer
 {
-    struct ClientData
+    internal readonly struct ClientData
     {
         public string Name { get; }
         public Socket Socket { get; }
@@ -18,14 +17,14 @@ namespace ChatUtils
         }
     }
 
-    class Utils
+    internal class Utils
     {
         private Socket socket;
         private int Port { get; }
 
-        private Dictionary<int, ClientData> clientMap;
+        private readonly Dictionary<int, ClientData> clientMap;
 
-        public int ClientCount { get { return clientMap.Count; } }
+        public int ClientCount => clientMap.Count;
 
         public Utils()
         {
@@ -139,16 +138,16 @@ namespace ChatUtils
         {
             // OPCode 전송
             byte[] buf = BitConverter.GetBytes((char)code);
-            socket.Send(buf.ToArray().Take(1).ToArray());
+            _ = socket.Send(buf.ToArray().Take(1).ToArray());
 
             // 패킷 크기 전송
-            var payload = Encoding.Default.GetBytes(message);
+            byte[] payload = Encoding.Default.GetBytes(message);
             int packetSize = payload.Length;
 
-            socket.Send(BitConverter.GetBytes(packetSize));
+            _ = socket.Send(BitConverter.GetBytes(packetSize));
 
             // 데이터 패킷 전송
-            socket.Send(payload);
+            _ = socket.Send(payload);
         }
 
         /// <summary>
@@ -174,7 +173,7 @@ namespace ChatUtils
                 }
                 else
                 {
-                    clientMap.Remove(clientIds[i]);
+                    _ = clientMap.Remove(clientIds[i]);
                 }
             }
 
@@ -205,26 +204,14 @@ namespace ChatUtils
             // 1. OP CODE 크기는 1 바이트
             buf = new byte[1];
 
-            if (SafeReceive(in socket, buf, 1))
-            {
-                op = (OpCode)int.Parse(BitConverter.ToString(buf), NumberStyles.HexNumber);
-            }
-            else
-            {
-                throw new Exception("OP CODE를 가져오는 과정에서 오류가 발생했습니다.");
-            }
+            op = SafeReceive(in socket, buf, 1)
+                ? (OpCode)int.Parse(BitConverter.ToString(buf), NumberStyles.HexNumber)
+                : throw new Exception("OP CODE를 가져오는 과정에서 오류가 발생했습니다.");
 
             // 2. 패킷 크기 정보는 4 바이트
             buf = new byte[4];
 
-            if (SafeReceive(in socket, buf, 4))
-            {
-                packetSize = BitConverter.ToInt32(buf);
-            }
-            else
-            {
-                throw new Exception("패킷 사이즈를 가져오는 과정에서 오류가 발생했습니다.");
-            }
+            packetSize = SafeReceive(in socket, buf, 4) ? BitConverter.ToInt32(buf) : throw new Exception("패킷 사이즈를 가져오는 과정에서 오류가 발생했습니다.");
 
             // 3. 데이터 크기는 위에서 구한 크기를 사용
             buf = new byte[packetSize];
@@ -265,7 +252,7 @@ namespace ChatUtils
         /// <param name="length">패킷의 크기</param>
         /// <param name="received">실제 크기</param>
         /// <returns>수신받은 데이터의 신뢰여부</returns>
-        static bool SafeReceive(in Socket socket, byte[] buf, in int length)
+        private static bool SafeReceive(in Socket socket, byte[] buf, in int length)
         {
             int received;
             int left = length;
@@ -328,7 +315,7 @@ namespace ChatUtils
             }
 
             clientMap[port].Socket.Disconnect(true);
-            clientMap.Remove(port);
+            _ = clientMap.Remove(port);
         }
     }
 }
