@@ -2,6 +2,7 @@
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ChatUtils
 {
@@ -128,15 +129,26 @@ namespace ChatUtils
         /// </summary>
         public void SendMessage(OpCode code, in string message)
         {
+            SendMessage(ref socket, code, in message);
+        }
+
+        /// <summary>
+        /// 상대방한테 메시지를 전송합니다.
+        /// </summary>
+        public static void SendMessage(ref Socket socket, OpCode code, in string message)
+        {
             // OPCode 전송
-            socket.Send(BitConverter.GetBytes((char)code));
+            byte[] buf = BitConverter.GetBytes((char)code);
+            socket.Send(buf.ToArray().Take(1).ToArray());
 
             // 패킷 크기 전송
-            int packetSize = message.Length;
+            var payload = Encoding.Default.GetBytes(message);
+            int packetSize = payload.Length;
+
             socket.Send(BitConverter.GetBytes(packetSize));
 
             // 데이터 패킷 전송
-            socket.Send(Encoding.Default.GetBytes(message));
+            socket.Send(payload);
         }
 
         /// <summary>
@@ -158,8 +170,7 @@ namespace ChatUtils
 
                 if (target.Connected)
                 {
-                    Utils tmpUtils = new Utils(ref target);
-                    tmpUtils.SendMessage(OpCode.Message, message);
+                    SendMessage(ref target, OpCode.Message, $"{GetName(ref target).Name}: {message}");
                 }
                 else
                 {
@@ -259,7 +270,7 @@ namespace ChatUtils
             int received;
             int left = length;
 
-            int offset = 0;            
+            int offset = 0;
 
             while (left > 0)
             {
