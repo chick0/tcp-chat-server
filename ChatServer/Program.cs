@@ -108,7 +108,7 @@ namespace ChatServer
                 }
                 else if (op == OpCode.Message)
                 {
-                    serverUtils.Broadcast((string)result);
+                    serverUtils.Broadcast(ref client, (string)result);
                 }
             }
         }
